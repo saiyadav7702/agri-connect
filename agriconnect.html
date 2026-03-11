@@ -9,6 +9,10 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
+<!-- Firebase JS SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
 <style>
 
 *{
@@ -243,6 +247,7 @@ border-radius:8px;
 <input type="text" id="crop-name" placeholder="Crop Name">
 <textarea id="crop-info" placeholder="Crop Details"></textarea>
 <input type="text" id="crop-price" placeholder="Price ₹">
+<input type="text" id="crop-location" placeholder="Location (Village / City)">
 
 <button onclick="addCrop()">Upload Crop</button>
 
@@ -272,8 +277,28 @@ border-radius:8px;
 
 <script>
 
-let users = JSON.parse(localStorage.getItem("users")) || [];
-let crops = JSON.parse(localStorage.getItem("crops")) || [];
+// initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCkV3t8D9id4AH9p-GLfLHys-cPUDtzhnA",
+  authDomain: "jayas-1db92.firebaseapp.com",
+  databaseURL: "https://jayas-1db92-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "jayas-1db92",
+  storageBucket: "jayas-1db92.appspot.com",
+  messagingSenderId: "695257723268",
+  appId: "1:695257723268:web:3cf02d01db5dca110bedd1",
+  measurementId: "G-KZNBP5PPCQ"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// references
+const usersRef = db.ref('users');
+const cropsRef = db.ref('crops');
+
+// legacy localStorage fallback (no longer used)
+// let users = JSON.parse(localStorage.getItem("users")) || [];
+// let crops = JSON.parse(localStorage.getItem("crops")) || [];
 
 let selectedRole="";
 let currentFarmerPhone="";
@@ -311,184 +336,177 @@ document.getElementById("signup-page").style.display="block";
 
 function signup(){
 
-let name=document.getElementById("name").value;
-let phone=document.getElementById("phone").value;
-let password=document.getElementById("password").value;
+  let name=document.getElementById("name").value;
+  let phone=document.getElementById("phone").value;
+  let password=document.getElementById("password").value;
 
-if(password.length < 8){
-alert("Password must be at least 8 characters");
-return;
+  if(password.length < 8){
+    alert("Password must be at least 8 characters");
+    return;
+  }
+
+  // check firebase for existing phone
+  usersRef.orderByChild('phone').equalTo(phone).once('value', snapshot => {
+    if(snapshot.exists()){
+      alert("⚠ Phone number already registered");
+      return;
+    }
+
+    usersRef.push({name,phone,password,role:selectedRole})
+      .then(() => {
+        alert("Account Created Successfully");
+        location.reload();
+      })
+      .catch(e => alert("Error: "+e.message));
+  });
 }
 
-let existingUser = users.find(u => u.phone === phone);
-
-if(existingUser){
-alert("⚠ Phone number already registered");
-return;
-}
-
-users.push({name,phone,password,role:selectedRole});
-
-localStorage.setItem("users",JSON.stringify(users));
-
-alert("Account Created Successfully");
-
-location.reload();
-
-}
 
 function login(){
 
-let phone=document.getElementById("login-phone").value;
-let password=document.getElementById("login-password").value;
+  let phone=document.getElementById("login-phone").value;
+  let password=document.getElementById("login-password").value;
 
-let user=users.find(u=>u.phone===phone && u.password===password && u.role===selectedRole);
+  usersRef.orderByChild('phone').equalTo(phone).once('value', snap => {
+    if(!snap.exists()){
+      alert("Invalid login");
+      return;
+    }
+    let user;
+    snap.forEach(child => { user = child.val(); user._key = child.key; });
 
-if(!user){
-alert("Invalid login");
-return;
+    if(user.password !== password || user.role !== selectedRole){
+      alert("Invalid login");
+      return;
+    }
+
+    hideAll();
+
+    if(user.role==="farmer"){
+      currentFarmerPhone=user.phone;
+      document.getElementById("farmer-dashboard").style.display="block";
+      renderMyCrops();
+    }else{
+      document.getElementById("buyer-dashboard").style.display="block";
+    }
+  });
 }
 
-hideAll();
-
-if(user.role==="farmer"){
-
-currentFarmerPhone=user.phone;
-
-document.getElementById("farmer-dashboard").style.display="block";
-
-renderMyCrops();
-
-}else{
-
-document.getElementById("buyer-dashboard").style.display="block";
-
-}
-
-}
 
 function addCrop(){
 
-let name=document.getElementById("crop-name").value;
-let info=document.getElementById("crop-info").value;
-let price=document.getElementById("crop-price").value;
+  let name=document.getElementById("crop-name").value.trim();
+  let info=document.getElementById("crop-info").value.trim();
+  let price=document.getElementById("crop-price").value.trim();
+  let location=document.getElementById("crop-location").value.trim();
 
-crops.push({name,info,price,contact:currentFarmerPhone});
+  /* Validation */
+  if(name===""){ alert("⚠ Please enter Crop Name"); return; }
+  if(info===""){ alert("⚠ Please enter Crop Details"); return; }
+  if(price===""){ alert("⚠ Please enter Crop Price"); return; }
+  if(location===""){ alert("⚠ Please enter Location"); return; }
 
-localStorage.setItem("crops",JSON.stringify(crops));
+  /* Save crop to Firebase */
+  cropsRef.push({name,info,price,location,contact:currentFarmerPhone})
+    .then(() => {
+      /* Clear inputs */
+      document.getElementById("crop-name").value="";
+      document.getElementById("crop-info").value="";
+      document.getElementById("crop-price").value="";
+      document.getElementById("crop-location").value="";
 
-renderMyCrops();
-
+      renderMyCrops();
+      alert("✅ Crop uploaded successfully");
+    })
+    .catch(e => alert("Error: "+e.message));
 }
+
 
 function renderMyCrops(){
 
-let container=document.getElementById("my-crops");
-container.innerHTML="";
+  let container=document.getElementById("my-crops");
+  container.innerHTML="";
 
-let count=0;
-
-crops.forEach((crop,index)=>{
-
-if(crop.contact===currentFarmerPhone){
-
-count++;
-
-let div=document.createElement("div");
-
-div.className="crop-row";
-
-div.innerHTML=`
-<span>🌾 ${crop.name} | 💰 ₹${crop.price}</span>
-
+  cropsRef.orderByChild('contact').equalTo(currentFarmerPhone).once('value', snap => {
+    let count=0;
+    snap.forEach(child => {
+      let crop = child.val();
+      let key = child.key;
+      count++;
+      let div=document.createElement("div");
+      div.className="crop-row";
+      div.innerHTML=`
+<span>🌾 ${crop.name} | 💰 ₹${crop.price} | 📍 ${crop.location}</span>
 <div>
-<button class="edit-btn" onclick="editCrop(${index})">Edit</button>
-<button class="delete-btn" onclick="deleteCrop(${index})">Delete</button>
+<button class="edit-btn" onclick="editCrop('${key}')">Edit</button>
+<button class="delete-btn" onclick="deleteCrop('${key}')">Delete</button>
 </div>
 `;
-
-container.appendChild(div);
-
+      container.appendChild(div);
+    });
+    document.getElementById("crop-count").innerText="🌾 Total Crops Uploaded: "+count;
+  });
 }
 
-});
 
-document.getElementById("crop-count").innerText="🌾 Total Crops Uploaded: "+count;
-
+function deleteCrop(key){
+  cropsRef.child(key).remove()
+    .then(renderMyCrops)
+    .catch(e => alert("Error: "+e.message));
 }
 
-function deleteCrop(index){
 
-crops.splice(index,1);
+function editCrop(key){
+  cropsRef.child(key).once('value').then(snapshot => {
+    let crop = snapshot.val();
+    let newName=prompt("Edit Crop Name",crop.name);
+    let newInfo=prompt("Edit Crop Details",crop.info);
+    let newPrice=prompt("Edit Price ₹",crop.price);
+    let newLocation=prompt("Edit Location",crop.location);
 
-localStorage.setItem("crops",JSON.stringify(crops));
-
-renderMyCrops();
-
+    if(newName && newInfo && newPrice && newLocation){
+      cropsRef.child(key).update({
+        name:newName,
+        info:newInfo,
+        price:newPrice,
+        location:newLocation
+      }).then(renderMyCrops);
+    }
+  });
 }
 
-function editCrop(index){
-
-let newName=prompt("Edit Crop Name",crops[index].name);
-let newInfo=prompt("Edit Crop Details",crops[index].info);
-let newPrice=prompt("Edit Price ₹",crops[index].price);
-
-if(newName && newInfo && newPrice){
-
-crops[index].name=newName;
-crops[index].info=newInfo;
-crops[index].price=newPrice;
-
-localStorage.setItem("crops",JSON.stringify(crops));
-
-renderMyCrops();
-
-}
-
-}
 
 function searchCrop(){
 
-let search=document.getElementById("search-crop").value.toLowerCase();
+  let search=document.getElementById("search-crop").value.toLowerCase();
+  let results=document.getElementById("buyer-results");
+  results.innerHTML="";
 
-let results=document.getElementById("buyer-results");
-
-results.innerHTML="";
-
-let found=crops.filter(c=>c.name.toLowerCase().includes(search));
-
-if(found.length===0){
-results.innerHTML="No crops found";
-return;
-}
-
-found.forEach(c=>{
-
-let div=document.createElement("div");
-
-div.className="crop-item";
-
-div.innerHTML=`
-
+  cropsRef.once('value', snap => {
+    let found=false;
+    snap.forEach(child => {
+      let c = child.val();
+      if(c.name.toLowerCase().includes(search)){
+        found=true;
+        let div=document.createElement("div");
+        div.className="crop-item";
+        div.innerHTML=`
 <h3>${c.name}</h3>
 <p>${c.info}</p>
 <p>💰 ₹${c.price}</p>
+<p>📍 ${c.location}</p>
 <p>📞 ${c.contact}</p>
-
-<a href="tel:${c.contact}">
-<button class="call-btn">Call Farmer</button>
-</a>
-
+<a href="tel:${c.contact}"><button class="call-btn">Call Farmer</button></a>
 `;
-
-results.appendChild(div);
-
-});
-
+        results.appendChild(div);
+      }
+    });
+    if(!found){ results.innerHTML="No crops found"; }
+  });
 }
+
 
 </script>
 
 </body>
 </html>
-
