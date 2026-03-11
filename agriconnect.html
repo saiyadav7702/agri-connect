@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>🌾 Agri Connect</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Poppins',sans-serif;
+}
+
+body{
+background:#f4f7f6;
+}
+
+/* HERO */
+
+.hero{
+position:relative;
+height:90vh;
+background:url("farmer.jpg") center/cover no-repeat;
+display:flex;
+align-items:center;
+justify-content:center;
+color:white;
+text-align:center;
+}
+
+.hero::before{
+content:"";
+position:absolute;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.55);
+}
+
+.hero-content{
+position:relative;
+z-index:2;
+}
+
+.hero h1{
+font-size:48px;
+margin-bottom:10px;
+}
+
+.hero p{
+font-size:20px;
+margin-bottom:30px;
+}
+
+.hero button{
+padding:14px 30px;
+margin:10px;
+border:none;
+border-radius:30px;
+font-size:16px;
+cursor:pointer;
+transition:0.3s;
+}
+
+.hero button:hover{
+transform:translateY(-4px);
+}
+
+/* DASHBOARD */
+
+.dashboard{
+display:none;
+padding:40px;
+max-width:650px;
+margin:60px auto;
+background:white;
+border-radius:15px;
+box-shadow:0 15px 35px rgba(0,0,0,0.15);
+}
+
+.dashboard h2{
+text-align:center;
+margin-bottom:20px;
+}
+
+.dashboard h3{
+margin-top:20px;
+color:#28a745;
+}
+
+input,textarea{
+width:100%;
+padding:12px;
+margin:12px 0;
+border-radius:8px;
+border:1px solid #ccc;
+}
+
+.dashboard button{
+width:100%;
+padding:12px;
+margin-top:10px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+font-size:15px;
+}
+
+.login-btn{background:#007bff;color:white;}
+.signup-btn{background:#28a745;color:white;}
+.call-btn{background:#ffc107;color:black;}
+
+.back-btn{
+background:#6c757d;
+color:white;
+margin-top:25px;
+}
+
+.crop-row{
+display:flex;
+justify-content:space-between;
+align-items:center;
+background:#fafafa;
+padding:12px;
+margin-top:10px;
+border-radius:8px;
+}
+
+.crop-row button{
+width:auto;
+padding:6px 12px;
+margin-left:5px;
+}
+
+.edit-btn{
+background:#17a2b8;
+color:white;
+}
+
+.delete-btn{
+background:#dc3545;
+color:white;
+}
+
+.crop-item{
+margin-top:15px;
+padding:15px;
+background:#fafafa;
+border-left:5px solid #28a745;
+border-radius:8px;
+}
+
+</style>
+</head>
+
+<body>
+
+<section class="hero">
+
+<div class="hero-content">
+
+<h1>🌾 Agri Connect</h1>
+<p>Connecting Farmers & Buyers 🤝</p>
+
+<button class="login-btn" onclick="openLoginChoice()">🔐 Login</button>
+<button class="signup-btn" onclick="openSignupChoice()">📝 Create Account</button>
+
+</div>
+
+</section>
+
+<!-- LOGIN CHOICE -->
+
+<div class="dashboard" id="login-choice">
+
+<h2>Login As</h2>
+
+<button onclick="openLogin('farmer')">👨‍🌾 Farmer</button>
+<button onclick="openLogin('buyer')">🛒 Buyer</button>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+</div>
+
+<!-- SIGNUP CHOICE -->
+
+<div class="dashboard" id="signup-choice">
+
+<h2>Create Account As</h2>
+
+<button onclick="openSignup('farmer')">👨‍🌾 Farmer</button>
+<button onclick="openSignup('buyer')">🛒 Buyer</button>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+</div>
+
+<!-- SIGNUP -->
+
+<div class="dashboard" id="signup-page">
+
+<h2>Create Account</h2>
+
+<input type="text" id="name" placeholder="Name">
+<input type="tel" id="phone" placeholder="Phone">
+<input type="password" id="password" placeholder="Password (min 8 characters)">
+
+<button onclick="signup()">Create Account</button>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+</div>
+
+<!-- LOGIN -->
+
+<div class="dashboard" id="login-page">
+
+<h2>Login</h2>
+
+<input type="tel" id="login-phone" placeholder="Phone">
+<input type="password" id="login-password" placeholder="Password">
+
+<button onclick="login()">Login</button>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+</div>
+
+<!-- FARMER DASHBOARD -->
+
+<div class="dashboard" id="farmer-dashboard">
+
+<h2>👨‍🌾 Farmer Dashboard</h2>
+
+<h3 id="crop-count">🌾 Total Crops Uploaded: 0</h3>
+
+<input type="text" id="crop-name" placeholder="Crop Name">
+<textarea id="crop-info" placeholder="Crop Details"></textarea>
+<input type="text" id="crop-price" placeholder="Price ₹">
+
+<button onclick="addCrop()">Upload Crop</button>
+
+<h3>🌾 My Crops</h3>
+
+<div id="my-crops"></div>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+</div>
+
+<!-- BUYER DASHBOARD -->
+
+<div class="dashboard" id="buyer-dashboard">
+
+<h2>🛒 Buyer Dashboard</h2>
+
+<input type="text" id="search-crop" placeholder="Search Crop">
+
+<button onclick="searchCrop()">Search</button>
+
+<div id="buyer-results"></div>
+
+<button class="back-btn" onclick="goBack()">⬅ Back</button>
+
+</div>
+
+<script>
+
+let users = JSON.parse(localStorage.getItem("users")) || [];
+let crops = JSON.parse(localStorage.getItem("crops")) || [];
+
+let selectedRole="";
+let currentFarmerPhone="";
+
+function hideAll(){
+document.querySelector(".hero").style.display="none";
+document.querySelectorAll(".dashboard").forEach(d=>d.style.display="none");
+}
+
+function goBack(){
+location.reload();
+}
+
+function openLoginChoice(){
+hideAll();
+document.getElementById("login-choice").style.display="block";
+}
+
+function openSignupChoice(){
+hideAll();
+document.getElementById("signup-choice").style.display="block";
+}
+
+function openLogin(role){
+selectedRole=role;
+hideAll();
+document.getElementById("login-page").style.display="block";
+}
+
+function openSignup(role){
+selectedRole=role;
+hideAll();
+document.getElementById("signup-page").style.display="block";
+}
+
+function signup(){
+
+let name=document.getElementById("name").value;
+let phone=document.getElementById("phone").value;
+let password=document.getElementById("password").value;
+
+if(password.length < 8){
+alert("Password must be at least 8 characters");
+return;
+}
+
+let existingUser = users.find(u => u.phone === phone);
+
+if(existingUser){
+alert("⚠ Phone number already registered");
+return;
+}
+
+users.push({name,phone,password,role:selectedRole});
+
+localStorage.setItem("users",JSON.stringify(users));
+
+alert("Account Created Successfully");
+
+location.reload();
+
+}
+
+function login(){
+
+let phone=document.getElementById("login-phone").value;
+let password=document.getElementById("login-password").value;
+
+let user=users.find(u=>u.phone===phone && u.password===password && u.role===selectedRole);
+
+if(!user){
+alert("Invalid login");
+return;
+}
+
+hideAll();
+
+if(user.role==="farmer"){
+
+currentFarmerPhone=user.phone;
+
+document.getElementById("farmer-dashboard").style.display="block";
+
+renderMyCrops();
+
+}else{
+
+document.getElementById("buyer-dashboard").style.display="block";
+
+}
+
+}
+
+function addCrop(){
+
+let name=document.getElementById("crop-name").value;
+let info=document.getElementById("crop-info").value;
+let price=document.getElementById("crop-price").value;
+
+crops.push({name,info,price,contact:currentFarmerPhone});
+
+localStorage.setItem("crops",JSON.stringify(crops));
+
+renderMyCrops();
+
+}
+
+function renderMyCrops(){
+
+let container=document.getElementById("my-crops");
+container.innerHTML="";
+
+let count=0;
+
+crops.forEach((crop,index)=>{
+
+if(crop.contact===currentFarmerPhone){
+
+count++;
+
+let div=document.createElement("div");
+
+div.className="crop-row";
+
+div.innerHTML=`
+<span>🌾 ${crop.name} | 💰 ₹${crop.price}</span>
+
+<div>
+<button class="edit-btn" onclick="editCrop(${index})">Edit</button>
+<button class="delete-btn" onclick="deleteCrop(${index})">Delete</button>
+</div>
+`;
+
+container.appendChild(div);
+
+}
+
+});
+
+document.getElementById("crop-count").innerText="🌾 Total Crops Uploaded: "+count;
+
+}
+
+function deleteCrop(index){
+
+crops.splice(index,1);
+
+localStorage.setItem("crops",JSON.stringify(crops));
+
+renderMyCrops();
+
+}
+
+function editCrop(index){
+
+let newName=prompt("Edit Crop Name",crops[index].name);
+let newInfo=prompt("Edit Crop Details",crops[index].info);
+let newPrice=prompt("Edit Price ₹",crops[index].price);
+
+if(newName && newInfo && newPrice){
+
+crops[index].name=newName;
+crops[index].info=newInfo;
+crops[index].price=newPrice;
+
+localStorage.setItem("crops",JSON.stringify(crops));
+
+renderMyCrops();
+
+}
+
+}
+
+function searchCrop(){
+
+let search=document.getElementById("search-crop").value.toLowerCase();
+
+let results=document.getElementById("buyer-results");
+
+results.innerHTML="";
+
+let found=crops.filter(c=>c.name.toLowerCase().includes(search));
+
+if(found.length===0){
+results.innerHTML="No crops found";
+return;
+}
+
+found.forEach(c=>{
+
+let div=document.createElement("div");
+
+div.className="crop-item";
+
+div.innerHTML=`
+
+<h3>${c.name}</h3>
+<p>${c.info}</p>
+<p>💰 ₹${c.price}</p>
+<p>📞 ${c.contact}</p>
+
+<a href="tel:${c.contact}">
+<button class="call-btn">Call Farmer</button>
+</a>
+
+`;
+
+results.appendChild(div);
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
+
