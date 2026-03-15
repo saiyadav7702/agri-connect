@@ -1,512 +1,329 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>🌾 Agri Connect</title>
-
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-
-<!-- Firebase JS SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
-
-body{
-background:#f4f7f6;
-}
-
-/* HERO */
-
-.hero{
-position:relative;
-height:90vh;
-background:url("farmer.jpg") center/cover no-repeat;
-display:flex;
-align-items:center;
-justify-content:center;
-color:white;
-text-align:center;
-}
-
-.hero::before{
-content:"";
-position:absolute;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.55);
-}
-
-.hero-content{
-position:relative;
-z-index:2;
-}
-
-.hero h1{
-font-size:48px;
-margin-bottom:10px;
-}
-
-.hero p{
-font-size:20px;
-margin-bottom:30px;
-}
-
-.hero button{
-padding:14px 30px;
-margin:10px;
-border:none;
-border-radius:30px;
-font-size:16px;
-cursor:pointer;
-transition:0.3s;
-}
-
-.hero button:hover{
-transform:translateY(-4px);
-}
-
-/* DASHBOARD */
-
-.dashboard{
-display:none;
-padding:40px;
-max-width:650px;
-margin:60px auto;
-background:white;
-border-radius:15px;
-box-shadow:0 15px 35px rgba(0,0,0,0.15);
-}
-
-.dashboard h2{
-text-align:center;
-margin-bottom:20px;
-}
-
-.dashboard h3{
-margin-top:20px;
-color:#28a745;
-}
-
-input,textarea{
-width:100%;
-padding:12px;
-margin:12px 0;
-border-radius:8px;
-border:1px solid #ccc;
-}
-
-.dashboard button{
-width:100%;
-padding:12px;
-margin-top:10px;
-border:none;
-border-radius:8px;
-cursor:pointer;
-font-size:15px;
-}
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Poppins',sans-serif;}
+body{background:#f4f7f6;}
+.hero{position:relative;height:90vh;background:url("farmer.jpg") center/cover no-repeat;display:flex;align-items:center;justify-content:center;color:white;text-align:center;}
+.hero::before{content:"";position:absolute;width:100%;height:100%;background:rgba(0,0,0,0.55);}
+.hero-content{position:relative;z-index:2;}
+.hero h1{font-size:48px;margin-bottom:10px;}
+.hero p{font-size:20px;margin-bottom:30px;}
+.hero button{padding:14px 30px;margin:10px;border:none;border-radius:30px;font-size:16px;cursor:pointer;transition:0.3s;}
+.hero button:hover{transform:translateY(-4px);}
+.dashboard{display:none;padding:40px;max-width:650px;margin:60px auto;background:white;border-radius:15px;box-shadow:0 15px 35px rgba(0,0,0,0.15);}
+.dashboard h2{text-align:center;margin-bottom:20px;}
+.dashboard h3{margin-top:20px;color:#28a745;}
+input,textarea{width:100%;padding:12px;margin:12px 0;border-radius:8px;border:1px solid #ccc;}
+.dashboard button{width:100%;padding:12px;margin-top:10px;border:none;border-radius:8px;cursor:pointer;font-size:15px;}
 .login-btn{background:#007bff;color:white;}
 .signup-btn{background:#28a745;color:white;}
 .call-btn{background:#ffc107;color:black;}
-
-.back-btn{
-background:#6c757d;
-color:white;
-margin-top:25px;
-}
-
-.crop-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:#fafafa;
-padding:12px;
-margin-top:10px;
-border-radius:8px;
-}
-
-.crop-row button{
-width:auto;
-padding:6px 12px;
-margin-left:5px;
-}
-
-.edit-btn{
-background:#17a2b8;
-color:white;
-}
-
-.delete-btn{
-background:#dc3545;
-color:white;
-}
-
-.crop-item{
-margin-top:15px;
-padding:15px;
-background:#fafafa;
-border-left:5px solid #28a745;
-border-radius:8px;
-}
-
+.back-btn{background:#6c757d;color:white;margin-top:25px;}
+.crop-row{display:flex;justify-content:space-between;align-items:center;background:#fafafa;padding:12px;margin-top:10px;border-radius:8px;}
+.crop-row button{width:auto;padding:6px 12px;margin-left:5px;}
+.edit-btn{background:#17a2b8;color:white;}
+.delete-btn{background:#dc3545;color:white;}
+.crop-item{margin-top:15px;padding:15px;background:#fafafa;border-left:5px solid #28a745;border-radius:8px;}
 </style>
 </head>
-
 <body>
-
-<section class="hero">
-
-<div class="hero-content">
-
-<h1>🌾 Agri Connect</h1>
-<p>Connecting Farmers & Buyers 🤝</p>
-
-<button class="login-btn" onclick="openLoginChoice()">🔐 Login</button>
-<button class="signup-btn" onclick="openSignupChoice()">📝 Create Account</button>
-
-</div>
-
-</section>
-
-<!-- LOGIN CHOICE -->
-
-<div class="dashboard" id="login-choice">
-
-<h2>Login As</h2>
-
-<button onclick="openLogin('farmer')">👨‍🌾 Farmer</button>
-<button onclick="openLogin('buyer')">🛒 Buyer</button>
-
-<button class="back-btn" onclick="goBack()">⬅ Back</button>
-
-</div>
-
-<!-- SIGNUP CHOICE -->
-
-<div class="dashboard" id="signup-choice">
-
-<h2>Create Account As</h2>
-
-<button onclick="openSignup('farmer')">👨‍🌾 Farmer</button>
-<button onclick="openSignup('buyer')">🛒 Buyer</button>
-
-<button class="back-btn" onclick="goBack()">⬅ Back</button>
-
-</div>
-
-<!-- SIGNUP -->
-
-<div class="dashboard" id="signup-page">
-
-<h2>Create Account</h2>
-
-<input type="text" id="name" placeholder="Name">
-<input type="tel" id="phone" placeholder="Phone">
-<input type="password" id="password" placeholder="Password (min 8 characters)">
-
-<button onclick="signup()">Create Account</button>
-
-<button class="back-btn" onclick="goBack()">⬅ Back</button>
-
-</div>
-
-<!-- LOGIN -->
-
-<div class="dashboard" id="login-page">
-
-<h2>Login</h2>
-
-<input type="tel" id="login-phone" placeholder="Phone">
-<input type="password" id="login-password" placeholder="Password">
-
-<button onclick="login()">Login</button>
-
-<button class="back-btn" onclick="goBack()">⬅ Back</button>
-
-</div>
-
-<!-- FARMER DASHBOARD -->
-
-<div class="dashboard" id="farmer-dashboard">
-
-<h2>👨‍🌾 Farmer Dashboard</h2>
-
-<h3 id="crop-count">🌾 Total Crops Uploaded: 0</h3>
-
-<input type="text" id="crop-name" placeholder="Crop Name">
-<textarea id="crop-info" placeholder="Crop Details"></textarea>
-<input type="text" id="crop-price" placeholder="Price ₹">
-<input type="text" id="crop-location" placeholder="Location (Village / City)">
-
-<button onclick="addCrop()">Upload Crop</button>
-
-<h3>🌾 My Crops</h3>
-
-<div id="my-crops"></div>
-
-<button class="back-btn" onclick="goBack()">⬅ Back</button>
-
-</div>
-
-<!-- BUYER DASHBOARD -->
-
-<div class="dashboard" id="buyer-dashboard">
-
-<h2>🛒 Buyer Dashboard</h2>
-
-<input type="text" id="search-crop" placeholder="Search Crop">
-
-<button onclick="searchCrop()">Search</button>
-
-<div id="buyer-results"></div>
-
-<button class="back-btn" onclick="goBack()">⬅ Back</button>
-
-</div>
-
+<section class="hero"><div class="hero-content"><h1>🌾 Agri Connect</h1><p>Connecting Farmers & Buyers 🤝</p><button class="login-btn" onclick="openLoginChoice()">🔐 Login</button><button class="signup-btn" onclick="openSignupChoice()">📝 Create Account</button></div></section>
+<div class="dashboard" id="login-choice"><h2>Login As</h2><button onclick="openLogin('farmer')">👨‍🌾 Farmer</button><button onclick="openLogin('buyer')">🛒 Buyer</button><button class="back-btn" onclick="goBack()">⬅ Back</button></div>
+<div class="dashboard" id="signup-choice"><h2>Create Account As</h2><button onclick="openSignup('farmer')">👨‍🌾 Farmer</button><button onclick="openSignup('buyer')">🛒 Buyer</button><button class="back-btn" onclick="goBack()">⬅ Back</button></div>
+<div class="dashboard" id="signup-page"><h2>Create Account</h2><input type="text" id="name" placeholder="Name"><input type="tel" id="phone" placeholder="Phone"><input type="password" id="password" placeholder="Password (min 8 characters)"><button onclick="signup()">Create Account</button><button class="back-btn" onclick="goBack()">⬅ Back</button></div>
+<div class="dashboard" id="login-page"><h2>Login</h2><input type="tel" id="login-phone" placeholder="Phone"><input type="password" id="login-password" placeholder="Password"><button onclick="login()">Login</button><button class="back-btn" onclick="goBack()">⬅ Back</button></div>
+<div class="dashboard" id="farmer-dashboard"><h2>👨‍🌾 Farmer Dashboard</h2><h3 id="crop-count">🌾 Total Crops Uploaded: 0</h3><input type="text" id="crop-name" placeholder="Crop Name"><textarea id="crop-info" placeholder="Crop Details"></textarea><input type="text" id="crop-price" placeholder="Price ₹"><input type="text" id="crop-location" placeholder="Location (Village / City)"><button onclick="addCrop()">Upload Crop</button><h3>🌾 My Crops</h3><div id="my-crops"></div><button class="back-btn" onclick="goBack()">⬅ Back</button></div>
+<div class="dashboard" id="buyer-dashboard"><h2>🛒 Buyer Dashboard</h2><input type="text" id="search-crop" placeholder="Search Crop"><button onclick="searchCrop()">Search</button><div id="buyer-results"></div><button class="back-btn" onclick="goBack()">⬅ Back</button></div>
 <script>
 
-// initialize Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCkV3t8D9id4AH9p-GLfLHys-cPUDtzhnA",
-  authDomain: "jayas-1db92.firebaseapp.com",
-  databaseURL: "https://jayas-1db92-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "jayas-1db92",
-  storageBucket: "jayas-1db92.appspot.com",
-  messagingSenderId: "695257723268",
-  appId: "1:695257723268:web:3cf02d01db5dca110bedd1",
-  measurementId: "G-KZNBP5PPCQ"
-};
+const API_BASE = "https://agriconnect-fastapi-python.vercel.app";
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// references
-const usersRef = db.ref('users');
-const cropsRef = db.ref('crops');
-
-// legacy localStorage fallback (no longer used)
-// let users = JSON.parse(localStorage.getItem("users")) || [];
-// let crops = JSON.parse(localStorage.getItem("crops")) || [];
-
-let selectedRole="";
-let currentFarmerPhone="";
+let selectedRole = "";
+let currentFarmerPhone = "";
 
 function hideAll(){
-document.querySelector(".hero").style.display="none";
-document.querySelectorAll(".dashboard").forEach(d=>d.style.display="none");
+document.querySelector('.hero').style.display='none';
+document.querySelectorAll('.dashboard').forEach(d=>d.style.display='none');
 }
 
 function goBack(){
-location.reload();
+window.location.reload();
 }
 
 function openLoginChoice(){
 hideAll();
-document.getElementById("login-choice").style.display="block";
+document.getElementById('login-choice').style.display='block';
 }
 
 function openSignupChoice(){
 hideAll();
-document.getElementById("signup-choice").style.display="block";
+document.getElementById('signup-choice').style.display='block';
 }
 
 function openLogin(role){
 selectedRole=role;
 hideAll();
-document.getElementById("login-page").style.display="block";
+document.getElementById('login-page').style.display='block';
 }
 
 function openSignup(role){
 selectedRole=role;
 hideAll();
-document.getElementById("signup-page").style.display="block";
+document.getElementById('signup-page').style.display='block';
 }
 
 function signup(){
 
-  let name=document.getElementById("name").value;
-  let phone=document.getElementById("phone").value;
-  let password=document.getElementById("password").value;
+const name=document.getElementById('name').value.trim();
+const phone=document.getElementById('phone').value.trim();
+const password=document.getElementById('password').value;
 
-  if(password.length < 8){
-    alert("Password must be at least 8 characters");
-    return;
-  }
-
-  // check firebase for existing phone
-  usersRef.orderByChild('phone').equalTo(phone).once('value', snapshot => {
-    if(snapshot.exists()){
-      alert("⚠ Phone number already registered");
-      return;
-    }
-
-    usersRef.push({name,phone,password,role:selectedRole})
-      .then(() => {
-        alert("Account Created Successfully");
-        location.reload();
-      })
-      .catch(e => alert("Error: "+e.message));
-  });
+if(password.length<8){
+alert('Password must be at least 8 characters');
+return;
 }
 
+fetch(API_BASE+'/signup',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+name:name,
+phone:phone,
+password:password,
+role:selectedRole
+})
+})
+
+.then(res=>res.json())
+.then(data=>{
+
+if(data.success){
+alert("Account Created Successfully");
+goBack();
+}else{
+alert(data.detail);
+}
+
+})
+.catch(()=>alert("Server error"));
+
+}
 
 function login(){
 
-  let phone=document.getElementById("login-phone").value;
-  let password=document.getElementById("login-password").value;
+const phone=document.getElementById('login-phone').value.trim();
+const password=document.getElementById('login-password').value;
 
-  usersRef.orderByChild('phone').equalTo(phone).once('value', snap => {
-    if(!snap.exists()){
-      alert("Invalid login");
-      return;
-    }
-    let user;
-    snap.forEach(child => { user = child.val(); user._key = child.key; });
+fetch(API_BASE+'/login',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+phone:phone,
+password:password,
+role:selectedRole
+})
+})
 
-    if(user.password !== password || user.role !== selectedRole){
-      alert("Invalid login");
-      return;
-    }
+.then(res=>res.json())
+.then(data=>{
 
-    hideAll();
+if(data.success){
 
-    if(user.role==="farmer"){
-      currentFarmerPhone=user.phone;
-      document.getElementById("farmer-dashboard").style.display="block";
-      renderMyCrops();
-    }else{
-      document.getElementById("buyer-dashboard").style.display="block";
-    }
-  });
+if(selectedRole==="farmer"){
+
+currentFarmerPhone=phone;
+
+hideAll();
+document.getElementById('farmer-dashboard').style.display='block';
+
+renderMyCrops();
+
 }
 
+else{
+
+hideAll();
+document.getElementById('buyer-dashboard').style.display='block';
+
+}
+
+}
+else{
+alert(data.detail);
+}
+
+})
+
+.catch(()=>alert("Server error"));
+
+}
 
 function addCrop(){
 
-  let name=document.getElementById("crop-name").value.trim();
-  let info=document.getElementById("crop-info").value.trim();
-  let price=document.getElementById("crop-price").value.trim();
-  let location=document.getElementById("crop-location").value.trim();
+const name=document.getElementById('crop-name').value.trim();
+const info=document.getElementById('crop-info').value.trim();
+const price=document.getElementById('crop-price').value.trim();
+const location=document.getElementById('crop-location').value.trim();
 
-  /* Validation */
-  if(name===""){ alert("⚠ Please enter Crop Name"); return; }
-  if(info===""){ alert("⚠ Please enter Crop Details"); return; }
-  if(price===""){ alert("⚠ Please enter Crop Price"); return; }
-  if(location===""){ alert("⚠ Please enter Location"); return; }
+fetch(API_BASE+'/crops',{
+method:'POST',
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+name:name,
+info:info,
+price:price,
+location:location,
+contact:currentFarmerPhone
+})
+})
 
-  /* Save crop to Firebase */
-  cropsRef.push({name,info,price,location,contact:currentFarmerPhone})
-    .then(() => {
-      /* Clear inputs */
-      document.getElementById("crop-name").value="";
-      document.getElementById("crop-info").value="";
-      document.getElementById("crop-price").value="";
-      document.getElementById("crop-location").value="";
+.then(res=>res.json())
+.then(data=>{
 
-      renderMyCrops();
-      alert("✅ Crop uploaded successfully");
-    })
-    .catch(e => alert("Error: "+e.message));
+if(data.success){
+
+alert("Crop Uploaded");
+
+document.getElementById('crop-name').value="";
+document.getElementById('crop-info').value="";
+document.getElementById('crop-price').value="";
+document.getElementById('crop-location').value="";
+
+renderMyCrops();
+
 }
 
+})
+
+}
 
 function renderMyCrops(){
 
-  let container=document.getElementById("my-crops");
-  container.innerHTML="";
+const container=document.getElementById('my-crops');
 
-  cropsRef.orderByChild('contact').equalTo(currentFarmerPhone).once('value', snap => {
-    let count=0;
-    snap.forEach(child => {
-      let crop = child.val();
-      let key = child.key;
-      count++;
-      let div=document.createElement("div");
-      div.className="crop-row";
-      div.innerHTML=`
-<span>🌾 ${crop.name} | 💰 ₹${crop.price} | 📍 ${crop.location}</span>
+container.innerHTML="";
+
+fetch(API_BASE+'/crops?contact='+currentFarmerPhone)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+const crops=data.crops;
+
+document.getElementById('crop-count').innerText="🌾 Total Crops Uploaded: "+crops.length;
+
+crops.forEach(c=>{
+
+const div=document.createElement('div');
+
+div.className='crop-row';
+
+div.innerHTML=`
+<span>🌾 <h3>${c.name}</h3>
+<h4>crop details:</h4> <p>${c.info}</p>
+<h4>Price:</h4> <p>₹ ${c.price}</p>
+<h4>Location:</h4> <p>${c.location}</p>
+<h4>Contact:</h4> <p>${c.contact}</p>
+</span>
+
 <div>
-<button class="edit-btn" onclick="editCrop('${key}')">Edit</button>
-<button class="delete-btn" onclick="deleteCrop('${key}')">Delete</button>
+<button class="edit-btn" onclick="editCrop('${c.id}')">Edit</button>
+<button class="delete-btn" onclick="deleteCrop('${c.id}')">Delete</button>
 </div>
 `;
-      container.appendChild(div);
-    });
-    document.getElementById("crop-count").innerText="🌾 Total Crops Uploaded: "+count;
-  });
+
+container.appendChild(div);
+
+});
+
+});
+
 }
 
+function deleteCrop(id){
 
-function deleteCrop(key){
-  cropsRef.child(key).remove()
-    .then(renderMyCrops)
-    .catch(e => alert("Error: "+e.message));
+fetch(API_BASE+"/crops/"+id,{
+method:"DELETE"
+})
+
+.then(res=>res.json())
+.then(()=>renderMyCrops())
+
 }
 
+function editCrop(id){
 
-function editCrop(key){
-  cropsRef.child(key).once('value').then(snapshot => {
-    let crop = snapshot.val();
-    let newName=prompt("Edit Crop Name",crop.name);
-    let newInfo=prompt("Edit Crop Details",crop.info);
-    let newPrice=prompt("Edit Price ₹",crop.price);
-    let newLocation=prompt("Edit Location",crop.location);
+const name=prompt("Crop name");
+const info=prompt("Crop details");
+const price=prompt("Price");
+const location=prompt("Location");
 
-    if(newName && newInfo && newPrice && newLocation){
-      cropsRef.child(key).update({
-        name:newName,
-        info:newInfo,
-        price:newPrice,
-        location:newLocation
-      }).then(renderMyCrops);
-    }
-  });
+fetch(API_BASE+"/crops/"+id,{
+
+method:"PUT",
+
+headers:{'Content-Type':'application/json'},
+
+body:JSON.stringify({
+name:name,
+info:info,
+price:price,
+location:location
+})
+
+})
+
+.then(res=>res.json())
+.then(()=>renderMyCrops())
+
 }
-
 
 function searchCrop(){
 
-  let search=document.getElementById("search-crop").value.toLowerCase();
-  let results=document.getElementById("buyer-results");
-  results.innerHTML="";
+const q=document.getElementById('search-crop').value;
 
-  cropsRef.once('value', snap => {
-    let found=false;
-    snap.forEach(child => {
-      let c = child.val();
-      if(c.name.toLowerCase().includes(search)){
-        found=true;
-        let div=document.createElement("div");
-        div.className="crop-item";
-        div.innerHTML=`
+fetch(API_BASE+"/crops?q="+q)
+
+.then(res=>res.json())
+
+.then(data=>{
+
+const results=document.getElementById('buyer-results');
+
+results.innerHTML="";
+
+data.crops.forEach(c=>{
+
+const d=document.createElement('div');
+
+d.className='crop-item';
+
+d.innerHTML=`
 <h3>${c.name}</h3>
 <p>${c.info}</p>
-<p>💰 ₹${c.price}</p>
-<p>📍 ${c.location}</p>
-<p>📞 ${c.contact}</p>
-<a href="tel:${c.contact}"><button class="call-btn">Call Farmer</button></a>
+<p>₹ ${c.price}</p>
+<p>${c.location}</p>
+<p>${c.contact}</p>
+
+<a href="tel:${c.contact}">
+<button class="call-btn">Call Farmer</button>
+</a>
 `;
-        results.appendChild(div);
-      }
-    });
-    if(!found){ results.innerHTML="No crops found"; }
-  });
+
+results.appendChild(d);
+
+});
+
+});
+
 }
 
-
 </script>
-
 </body>
 </html>
